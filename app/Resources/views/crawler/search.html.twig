@@ -9,14 +9,16 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% for newJ in crawled %}
-			<tr>
-				<td>{{ newJ.id }}</td>
-				<td>{{ newJ.company }}</td>
-				<td>{{ newJ.location }}</td>
-				<td>{{ newJ.title }}</td>
-				<td>show</td>
-			</tr>
-		{% endfor %}
+		{% if crawled is not empty  %}
+			{% for newJ in crawled %}
+				<tr>
+					<td>{{ newJ.id }}</td>
+					<td>{{ newJ.title }}</td>
+					<td>{{ newJ.company }}</td>
+					<td>{{ newJ.location }}</td>
+					<td><a href="{{ path('match', {'jobId' : newJ.id }) }}">Show</a></td>
+				</tr>
+			{% endfor %}
+		{% endif %}
 	</tbody>
 </table>

@@ -1,0 +1,32 @@
+<b>Best candidates for: {{ title }}</b>
+</br>
+</br>
+Relevant keywords: {{ skills }}
+</br>
+</br>
+<table border="1">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Name</th>
+			<th>Work</th>
+			<th>Experience</th>
+			<th>Education</th>
+			<th>Score</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% if matchings is not empty  %}
+			{% for Cv in matchings %}
+				<tr>
+					<td>{{ Cv.id }}</td>
+					<td>{{ Cv.name }}</td>
+					<td>{{ Cv.work }}</td>
+					<td>{{ Cv.experience }}</td>
+					<td>{{ Cv.education }}</td>
+					<td>{{ Cv.score }}</td>
+				</tr>
+			{% endfor %}
+		{% endif %}
+	</tbody>
+</table>

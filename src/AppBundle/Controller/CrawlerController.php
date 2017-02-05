@@ -82,7 +82,8 @@ class CrawlerController extends Controller
 	
     public function searchAction(Request $request)
     {		
-		if($criteria = $request->query->get('criteria')){
+		$criteria = $request->get('criteria');
+		if($criteria){
 			$em = $this->getDoctrine()->getManager();
 			$qb = $em->createQueryBuilder('jobs');
 			$crawled = $qb->select('j')
@@ -93,15 +94,47 @@ class CrawlerController extends Controller
 					->getQuery()
 					->getResult();
 		}else{
-			$criteria='';
 			$crawled = $this->getDoctrine()->getRepository('AppBundle:Job')->findAll();
 		}
 		return $this->render('crawler/search.html.twig', array('criteria' => $criteria,'crawled' => $crawled));
 	}
+	
     public function listAction(Request $request)
     {	
 		$criteria='';		
         return $this->render('crawler/list.html.twig', array('criteria' => $criteria));
+    }
+	
+    public function matchAction($jobId)
+    {	
+		$job = $this->getDoctrine()
+			->getRepository('AppBundle:Job')
+			->find($jobId);	
+		$skills = explode(',', $job->getDescription());
+		$em = $this->getDoctrine()->getManager();
+		$cvS = $this->getDoctrine()
+			->getRepository('AppBundle:Cv')
+			->findAll();
+		$matchings = array();
+		foreach($cvS as $cv){
+				$cvSkills = explode(',', $cv->getExperience());
+				$matching = new \stdClass();
+				$matching->id = $cv->getId();
+				$matching->name = $cv->getName();
+				$matching->work = $cv->getWork();
+				$matching->experience = $cv->getExperience();
+				$matching->education = $cv->getEducation();
+				$totals = array_intersect($skills, $cvSkills);
+				$matching->score = 100 * count($totals) / count($skills) . "%";
+				$matchings[] = $matching;
+		}
+		
+		
+		
+        return $this->render('crawler/match.html.twig', array(
+			'matchings' => $matchings,
+			'title' => $job->getTitle() . ' - ' . $job->getCompany(),
+			'skills' => $job->getDescription(), ));
     }
 	
     public function crawlAction(Request $request)

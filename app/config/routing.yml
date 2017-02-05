@@ -8,6 +8,11 @@ list:
 search:
     path:      /search
     defaults:  { _controller: AppBundle:Crawler:search }
+match:
+    path:      /match/{jobId}
+    defaults:  { _controller: AppBundle:Crawler:match }
+    requirements:
+        jobId: '\d+'
 doCrawl:
     path:      /doCrawl
     defaults:  { _controller: AppBundle:Crawler:doCrawl }
