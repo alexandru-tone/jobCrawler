@@ -5,7 +5,10 @@ app:
 list:
     path:      /list
     defaults:  { _controller: AppBundle:Crawler:list }
-crawl:
+doCrawl:
+    path:      /doCrawl
+    defaults:  { _controller: AppBundle:Crawler:doCrawl }
+crawlResults:
     path:      /crawl
     defaults:  { _controller: AppBundle:Crawler:crawl }
 detail:

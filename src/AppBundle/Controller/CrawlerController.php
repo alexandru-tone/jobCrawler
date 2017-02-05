@@ -6,6 +6,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
+use AppBundle\Entity\Job;
+
 use Symfony\Component\DomCrawler\Crawler;
 
 class CrawlerController extends Controller
@@ -18,13 +20,10 @@ class CrawlerController extends Controller
         ]);
     }
 	
-    public function listAction(Request $request)
-    {
-		
-		$url = 'https://www.bestjobs.eu/ro/locuri-de-munca?location=bucuresti&keyword=symfony';
-		
-//		$pageToCrawl = file_get_contents($url);
-		
+    public function doCrawlAction(Request $request)
+    {		
+		$url = 'https://www.bestjobs.eu/ro/locuri-de-munca?location=bucuresti&keyword=symfony';		
+//		$pageToCrawl = file_get_contents($url);		
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -41,28 +40,28 @@ class CrawlerController extends Controller
 		$pageToCrawl = curl_exec($ch);
 		$status = curl_getinfo($ch);
 		curl_close($ch);
-
 //		$follow_allowed = ( ini_get('open_basedir') || ini_get('safe_mode')) ? false : true;
 //		if ($follow_allowed) {
 //			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 //		}
 		
-		$crawler = new Crawler($pageToCrawl);
-		
+		$em = $this->getDoctrine()->getManager();
+		$crawler = new Crawler($pageToCrawl);		
 		$jobsList = $crawler->filter('.card-list');
 		$jobs = $crawler->filter('.job-card.card-item');
-
 		$parsedJobs = array();
 		if (iterator_count($jobs) > 1) {
 			foreach ($jobs as $key => $job) {
-	//			var_dump($domElement->nodeName);
 				$title = new Crawler($job);
 				$company = new Crawler($job);
+				$company1Name = $company->filter('img')->attr('alt');
+				$company2 = new Crawler($job);
+				$company2Name = trim($company->filter('p.truncate-1-line')->text());
 				$location = new Crawler($job);
 				$description = new Crawler($job);
 				$parsedJobs[] = array(
-					'title' => $title->filter('img')->attr('alt'),
-					'company' => trim($company->filter('p.job-title a')->text()),
+					'title' => trim($title->filter('p.job-title a')->text()),
+					'company' => $company1Name ? $company1Name : $company2Name ? $company2Name : '',
 					'location' => trim($location->filter('p.text-muted')->text()),
 					'description' => implode(',',
 							$description->filter('a.search-after-keyword')
@@ -72,12 +71,26 @@ class CrawlerController extends Controller
 			}
 		}
 		
-		var_dump($parsedJobs);
-		die;
+		if(count($parsedJobs)){
+			foreach($parsedJobs as $newJ){	
+				$newJob = new Job();
+				$newJob->setTitle($newJ['title']);
+				$newJob->setCompany($newJ['company']);
+				$newJob->setLocation($newJ['location']);
+				$newJob->setDescription($newJ['description']);
+				$em->persist($newJob);
+				$em->flush();		
+			}
+		}
 		
-        return $this->render('crawler/list.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
-        ]);
+        return $this->render('crawler/crawl.html.twig', array('jobResults' => $parsedJobs));
+    }
+	
+    public function listAction(Request $request)
+    {		
+		$crawled = $this->getDoctrine()->getRepository('AppBundle:Job')->findAll();
+		
+        return $this->render('crawler/list.html.twig', array('crawled' => $crawled));
     }
 	
     public function crawlAction(Request $request)

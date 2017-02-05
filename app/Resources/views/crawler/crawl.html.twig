@@ -1,2 +1,4 @@
-{# empty Twig template #}
-crawl
+<b>Jobs crawled from BestJobs</b>
+{% for jobR in jobResults %}
+	{{ jobR.title }} - {{ jobR.company }} - {{ jobR.location }} </br>
+{% endfor %}
