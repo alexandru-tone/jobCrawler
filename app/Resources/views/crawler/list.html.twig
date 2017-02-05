@@ -3,29 +3,7 @@
 	<input type="submit" id="criteriaSubmit">
 </form>
 <a href="{{ path('doCrawl') }}">Crawl jobs from bestjobs</a>
-<div id="filteredJobs">			
-	<table border="1">
-		<thead>
-			<tr>
-				<th>ID</th>
-				<th>Title</th>
-				<th>Company</th>
-				<th>Location</th>
-				<th>Candidates</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for newJ in crawled %}
-				<tr>
-					<td>{{ newJ.id }}</td>
-					<td>{{ newJ.company }}</td>
-					<td>{{ newJ.location }}</td>
-					<td>{{ newJ.title }}</td>
-					<td>show</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+<div id="filteredJobs">	
 </div>	
 		
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -44,6 +22,9 @@ function getFilteredJobs(){
 }
 $('#criteriaSubmit').click(function(e){
 	e.preventDefault();
+	getFilteredJobs();
+});
+$(document).ready(function(){
 	getFilteredJobs();
 });
 </script>

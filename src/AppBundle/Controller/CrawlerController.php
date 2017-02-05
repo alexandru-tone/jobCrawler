@@ -100,10 +100,8 @@ class CrawlerController extends Controller
 	}
     public function listAction(Request $request)
     {	
-		$criteria='';
-		$crawled = $this->getDoctrine()->getRepository('AppBundle:Job')->findAll();
-		
-        return $this->render('crawler/list.html.twig', array('crawled' => $crawled, 'criteria' => $criteria));
+		$criteria='';		
+        return $this->render('crawler/list.html.twig', array('criteria' => $criteria));
     }
 	
     public function crawlAction(Request $request)
