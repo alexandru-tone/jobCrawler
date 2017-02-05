@@ -5,9 +5,9 @@ namespace AppBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\Query\ResultSetMapping;
 
 use AppBundle\Entity\Job;
-
 use Symfony\Component\DomCrawler\Crawler;
 
 class CrawlerController extends Controller
@@ -39,12 +39,7 @@ class CrawlerController extends Controller
 		curl_setopt($ch, CURLOPT_ENCODING, 'gzip,deflate');
 		$pageToCrawl = curl_exec($ch);
 		$status = curl_getinfo($ch);
-		curl_close($ch);
-//		$follow_allowed = ( ini_get('open_basedir') || ini_get('safe_mode')) ? false : true;
-//		if ($follow_allowed) {
-//			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-//		}
-		
+		curl_close($ch);		
 		$em = $this->getDoctrine()->getManager();
 		$crawler = new Crawler($pageToCrawl);		
 		$jobsList = $crawler->filter('.card-list');
@@ -69,8 +64,7 @@ class CrawlerController extends Controller
 						)
 				);
 			}
-		}
-		
+		}		
 		if(count($parsedJobs)){
 			foreach($parsedJobs as $newJ){	
 				$newJob = new Job();
@@ -81,16 +75,35 @@ class CrawlerController extends Controller
 				$em->persist($newJob);
 				$em->flush();		
 			}
-		}
-		
+		}		
         return $this->render('crawler/crawl.html.twig', array('jobResults' => $parsedJobs));
     }
 	
-    public function listAction(Request $request)
+	
+    public function searchAction(Request $request)
     {		
+		if($criteria = $request->query->get('criteria')){
+			$em = $this->getDoctrine()->getManager();
+			$qb = $em->createQueryBuilder('jobs');
+			$crawled = $qb->select('j')
+					->from('AppBundle:Job', 'j')
+					->where('j.title LIKE \'%'.$criteria.'%\'')
+					->orWhere('j.location LIKE \'%'.$criteria.'%\'')
+					->orWhere('j.description LIKE \'%'.$criteria.'%\'')
+					->getQuery()
+					->getResult();
+		}else{
+			$criteria='';
+			$crawled = $this->getDoctrine()->getRepository('AppBundle:Job')->findAll();
+		}
+		return $this->render('crawler/search.html.twig', array('criteria' => $criteria,'crawled' => $crawled));
+	}
+    public function listAction(Request $request)
+    {	
+		$criteria='';
 		$crawled = $this->getDoctrine()->getRepository('AppBundle:Job')->findAll();
 		
-        return $this->render('crawler/list.html.twig', array('crawled' => $crawled));
+        return $this->render('crawler/list.html.twig', array('crawled' => $crawled, 'criteria' => $criteria));
     }
 	
     public function crawlAction(Request $request)

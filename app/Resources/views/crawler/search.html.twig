@@ -1,0 +1,22 @@
+<table border="1">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Title</th>
+			<th>Company</th>
+			<th>Location</th>
+			<th>Candidates</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for newJ in crawled %}
+			<tr>
+				<td>{{ newJ.id }}</td>
+				<td>{{ newJ.company }}</td>
+				<td>{{ newJ.location }}</td>
+				<td>{{ newJ.title }}</td>
+				<td>show</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

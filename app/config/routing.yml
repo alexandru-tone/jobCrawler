@@ -5,6 +5,9 @@ app:
 list:
     path:      /list
     defaults:  { _controller: AppBundle:Crawler:list }
+search:
+    path:      /search
+    defaults:  { _controller: AppBundle:Crawler:search }
 doCrawl:
     path:      /doCrawl
     defaults:  { _controller: AppBundle:Crawler:doCrawl }
