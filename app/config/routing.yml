@@ -1,3 +1,13 @@
 app:
     resource: "@AppBundle/Controller/"
     type:     annotation
+
+list:
+    path:      /list
+    defaults:  { _controller: AppBundle:Crawler:list }
+crawl:
+    path:      /crawl
+    defaults:  { _controller: AppBundle:Crawler:crawl }
+detail:
+    path:      /detail
+    defaults:  { _controller: AppBundle:Crawler:detail }
